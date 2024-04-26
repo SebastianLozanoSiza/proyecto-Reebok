@@ -79,6 +79,16 @@ public class ServiceTransaccionImpl implements ServiceTransaccion {
                     Producto producto = repositoryProducto.findById(dto.getIdProducto())
                             .orElseThrow(() -> new RuntimeException(
                                     "El producto con ID " + dto.getIdProducto() + " no existe."));
+                    // Verificar si hay stock suficiente
+                    if (producto.getStock() < dto.getCantidad()) {
+                        throw new RuntimeException(
+                                "No hay suficiente stock del producto con ID " + dto.getIdProducto());
+                    }
+
+                    // Disminuir la cantidad del producto
+                    producto.setStock(producto.getStock() - dto.getCantidad());
+                    repositoryProducto.save(producto);
+
                     TransaccionProducto transaccionProducto = new TransaccionProducto();
                     transaccionProducto.setProducto(producto);
                     transaccionProducto.setCantidad(dto.getCantidad());
@@ -110,7 +120,8 @@ public class ServiceTransaccionImpl implements ServiceTransaccion {
         if (transaccionOptional.isPresent()) {
             Transaccion transaccionCurrent = transaccionOptional.get();
             transaccionCurrent.setCliente(convert.convertSaveToEntity(transaccionSaveDTO).getCliente());
-            transaccionCurrent.setTransaccionProductos(convert.convertSaveToEntity(transaccionSaveDTO).getTransaccionProductos());
+            transaccionCurrent
+                    .setTransaccionProductos(convert.convertSaveToEntity(transaccionSaveDTO).getTransaccionProductos());
             transaccionCurrent.setTotal(transaccionSaveDTO.getTotal());
             Transaccion transaccionActualizada = repositoryTransaccion.save(transaccionCurrent);
             return convert.convertSaveToDTO(transaccionActualizada);
