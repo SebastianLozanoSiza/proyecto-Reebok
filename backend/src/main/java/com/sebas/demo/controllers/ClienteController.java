@@ -3,6 +3,7 @@ package com.sebas.demo.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +48,14 @@ public class ClienteController {
 
     @GetMapping("/email/{email}")
     public ResponseEntity<ClienteListDTO> buscarPorEmail(@PathVariable String email){
-        ClienteListDTO findByEmail = serviceCliente.findByEmail(email);
-        if (findByEmail == null) {
+        Optional<ClienteListDTO> findByEmail = serviceCliente.findByEmail(email);
+        if (findByEmail.isPresent()) {
+            return ResponseEntity.ok(findByEmail.get());
+        } else {
             return ResponseEntity.noContent().build();
-        }else{
-            return ResponseEntity.ok(findByEmail);
         }
     }
+    
 
     @GetMapping("/cedula/{cedula}")
     public ResponseEntity<ClienteListDTO> buscarPorCedula(@PathVariable String cedula){

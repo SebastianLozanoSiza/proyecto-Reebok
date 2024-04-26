@@ -39,13 +39,15 @@ public class ServiceClienteImpl implements ServiceCliente{
 
     @Override
     @Transactional(readOnly = true)
-    public ClienteListDTO findByEmail(String email) {
-        Cliente cliente = repositoryCliente.findByEmail(email);
-        if (cliente == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado");
+    public Optional<ClienteListDTO> findByEmail(String email) {
+        Optional<Cliente> cliente = repositoryCliente.findByEmail(email);
+        if (cliente.isPresent()) {
+            return Optional.of(convert.convertToDTO(cliente.get()));
+        } else {
+            return Optional.empty();
         }
-        return convert.convertToDTO(cliente);
     }
+    
 
     @Override
     @Transactional(readOnly = true)
